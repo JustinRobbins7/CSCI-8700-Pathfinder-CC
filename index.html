@@ -34,7 +34,9 @@ const ancestries = {
         languages: [],
         language_options: [],
         traits: [],
-        darkvision: false
+        abilities: [],
+        heritages: [],
+        ancestry_feats: []
     },
     "Dwarf": {
         hp: 10,
@@ -49,7 +51,22 @@ const ancestries = {
         languages: ["Common", "Dwarven"],
         language_options: ["Gnomish", "Goblin", "Jotun", "Orcish", "Terran", "Undercommon"],
         traits: ["Dwarf", "Hunamoid"],
-        darkvision: true
+        abilities: ["Darkvision"],
+        heritages: [
+            "Ancient-Blooded Dwarf",
+            "Death Warden Dwarf",
+            "Forge Dwarf",
+            "Rock Dwarf",
+            "Strong-Blooded Dwarf"
+        ],
+        ancestry_feats: [
+            "Dwarven Lore",
+            "Dwarven Weapon Familiarity",
+            "Rock Runner",
+            "Stonecunning",
+            "Unburdened Iron",
+            "Vengeful Hatred"
+        ]
     }
 };
 
@@ -92,6 +109,11 @@ const classes = {
         attacks: {
             "Simple Attacks": Trained,
             "Unarmed Attacks": Trained
+        },
+        "defenses": {
+            "Light Armor": Trained,
+            "Medium Armor": Trained,
+            "Unarmored Defense": Trained
         },
         scores: [
             "Wisdom"
