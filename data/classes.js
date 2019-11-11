@@ -5,7 +5,17 @@ const classes = {
         bonus_skills: 0,
         attacks: {},
         scores: [],
-        hp: 0
+        hp: 0,
+        features: [],
+        subclasses: {
+            "": {
+                skills: {},
+                bonus_skills: 0,
+                feats: [],
+                spells: []
+            }
+        },
+        feats: []
     },
     "Druid": {
         saving_throws: {
@@ -29,6 +39,49 @@ const classes = {
         scores: [
             "Wisdom"
         ],
-        hp: 8
+        hp: 8,
+        features: [
+            "Primal Spellcasting",
+            "Anathema",
+            "Druidic Language",
+            "Druidic Order",
+            "Shield Block",
+            "Wild Empathy"
+        ],
+        subclasses: {
+            "Animal": {
+                skills: {
+                    "Athletics": Trained
+                },
+                bonus_skills: 0,
+                feats: ["Animal Companion"],
+                spells: ["Heal Animal"]
+            },
+            "Leaf": {
+                skills: {
+                    "Diplomacy": Trained
+                },
+                bonus_skills: 0,
+                feats: ["Leshy Familiar"],
+                spells: ["Goodberry"]
+            },
+            "Strom": {
+                skills: {
+                    "Acrobatics": Trained
+                },
+                bonus_skills: 0,
+                feats: ["Storm Born"],
+                spells: ["Tempest Surge"]
+            },
+            "Wild": {
+                skills: {
+                    "Intimidation": Trained
+                },
+                bonus_skills: 0,
+                feats: ["Wild Shape"],
+                spells: ["Wild Morph"]
+            }
+        },
+        feats: []
     }
 };
