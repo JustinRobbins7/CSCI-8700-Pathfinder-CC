@@ -134,11 +134,12 @@ class Application extends React.Component {
         this.state = {
             notes: "",
             ancestry: "",
+            ancestry_boost1: "",
+            ancestry_boost2: "",
             background: "",
             background_boost1: "",
             background_boost2: "",
             class_: "",
-            ancestry_boost: "",
             class_boost: "",
             boost1: "",
             boost2: "",
@@ -151,10 +152,70 @@ class Application extends React.Component {
             gender: ""
         };
         this.handleChange = this.handleChange.bind(this);
+        this.bonuses = this.bonuses.bind(this);
+        this.scores = this.scores.bind(this);
+        this.ancestry = this.ancestry.bind(this);
+        this.background = this.background.bind(this);
+        this.class_ = this.class_.bind(this);
+    }
+
+    bonuses(step) {
+        if (step === undefined) {
+            step = 10;
+        }
+        const steps = [
+            [],
+            [],
+            [this.ancestry().scores, this.state.ancestry_boost1, this.state.ancestry_boost2],
+            [this.state.background_boost1, this.state.background_boost2],
+            [this.state.class_boost],
+            [this.state.boost1, this.state.boost2, this.state.boost3, this.state.boost4]
+        ];
+        let out = [];
+        for (let i = 0; i < Math.min(steps.length, step); i++) {
+            out = out.concat(steps[i]);
+        }
+        return out;
+    }
+
+    scores(step) {
+        const bonuses = this.bonuses(step);
+        const scores = {"": 0};
+        stats.forEach((stat) => scores[stat] = 10);
+        for (let data of bonuses) {
+            if (typeof data === 'string') {
+                scores[data] += 2;
+            }
+            else {
+                for (let score of Object.keys(data)) {
+                    scores[score] += data[score];
+                }
+            }
+        }
+        delete scores[""];
+        return scores;
     }
 
     handleChange(event) {
         this.setState({[event.target.id]: event.target.value});
+        if (event.target.id == "ancestry") {
+            this.setState({
+                ancestry_boost1: "",
+                ancestry_boost2: ""
+            })
+        }
+    }
+
+    ancestry() {
+        return ancestries[this.state.ancestry];
+    }
+
+    background() {
+        return backgrounds[this.state.background];
+    }
+
+    class_() {
+        return classes[this.state.class_];
     }
 
     render() {
@@ -172,10 +233,12 @@ class Application extends React.Component {
                         <textarea id="notes" className="form-control" rows="4" value={this.state.notes} onChange={this.handleChange}></textarea>
                     </div>
                 </Collapse>
+
                 <Collapse parent="steps" id="step2" name="Step #2: Start Building Ability Scores">
                     <p>Write down 10 for every ability score</p>
-                    <ScoreBox bonuses={[]} />
+                    <ScoreBox scores={this.scores(2)} />
                 </Collapse>
+
                 <Collapse parent="steps" id="step3" name="Step #3: Select an Ancestry">
                     <p>Your character's ancestry determines their size, speed, languages, some of their hp, plus ability boosts and flaws.</p>
                     <div className="form-group input-group">
@@ -187,19 +250,35 @@ class Application extends React.Component {
                             {Object.keys(ancestries).slice(1).map((item) => <option value={item} key={item}>{item}</option>)}
                         </select>
                     </div>
-                    {(this.state.ancestry) ?
+                    {(this.state.ancestry && this.ancestry().free >= 1) ?
                         <div className="form-group input-group">
                             <div className="input-group-prepend">
-                                <label className="input-group-text" htmlFor="ancestry_boost">Free Ability Boost</label>
+                                <label className="input-group-text" htmlFor="ancestry_boost1">Free Ability Boost</label>
                             </div>
-                            <select id="ancestry_boost" className="form-control custom-select" value={this.state.ancestry_boost} onChange={this.handleChange}>
+                            <select id="ancestry_boost1" className="form-control custom-select" value={this.state.ancestry_boost1} onChange={this.handleChange}>
                                 <option value="" key="">&darr;</option>
-                                {stats.map((item) => <option value={item} key={item}>{item}</option>)}
+                                {stats.filter(
+                                    (item) => !Object.keys(this.ancestry().scores).includes(item) && item != this.state.ancestry_boost2
+                                ).map((item) => <option value={item} key={item}>{item}</option>)}
                             </select>
                         </div>
                     :""}
-                    <ScoreBox bonuses={[ancestries[this.state.ancestry].scores, [this.state.ancestry_boost]]} />
+                    {(this.state.ancestry && this.ancestry().free >= 2) ?
+                        <div className="form-group input-group">
+                            <div className="input-group-prepend">
+                                <label className="input-group-text" htmlFor="ancestry_boost2">Free Ability Boost</label>
+                            </div>
+                            <select id="ancestry_boost2" className="form-control custom-select" value={this.state.ancestry_boost2} onChange={this.handleChange}>
+                                <option value="" key="">&darr;</option>
+                                {stats.filter(
+                                    (item) => !Object.keys(this.ancestry().scores).includes(item) && item != this.state.ancestry_boost1
+                                ).map((item) => <option value={item} key={item}>{item}</option>)}
+                            </select>
+                        </div>
+                    :""}
+                    <ScoreBox scores={this.scores(3)} />
                 </Collapse>
+
                 <Collapse parent="steps" id="step4" name="Step #4: Pick a Background">
                     <p>Your character's background represents their upbringing, an aptitude they've been honing since their youth, or another aspect of their life before they became an adventuer.</p>
                     <div className="form-group input-group">
@@ -219,7 +298,7 @@ class Application extends React.Component {
                                 </div>
                                 <select id="background_boost1" className="form-control custom-select" value={this.state.background_boost1} onChange={this.handleChange}>
                                     <option value="" key="">&darr;</option>
-                                    {backgrounds[this.state.background].boost1.filter(
+                                    {this.background().boost1.filter(
                                         (item) => item != this.state.background_boost2
                                     ).map((item) => <option value={item} key={item}>{item}</option>)}
                                 </select>
@@ -230,15 +309,16 @@ class Application extends React.Component {
                                 </div>
                                 <select id="background_boost2" className="form-control custom-select" value={this.state.background_boost2} onChange={this.handleChange}>
                                     <option value="" key="">&darr;</option>
-                                    {backgrounds[this.state.background].boost2.filter(
+                                    {this.background().boost2.filter(
                                         (item) => item != this.state.background_boost1
                                     ).map((item) => <option value={item} key={item}>{item}</option>)}
                                 </select>
                             </div>
                         </div>
                     :""}
-                    <ScoreBox bonuses={[ancestries[this.state.ancestry].scores, [this.state.ancestry_boost, this.state.background_boost1, this.state.background_boost2]]} />
+                    <ScoreBox scores={this.scores(4)} />
                 </Collapse>
+
                 <Collapse parent="steps" id="step5" name="Step #5: Choose a Class">
                     <p>A class gives your character access to a suite of heroic abilities, determines how effectively they fight, and governs how easily they can shake off or avoid certain harmful effects.</p>
                     <div className="form-group input-group">
@@ -257,13 +337,13 @@ class Application extends React.Component {
                             </div>
                             <select id="class_boost" className="form-control custom-select" value={this.state.class_boost} onChange={this.handleChange}>
                                 <option value="" key="">&darr;</option>
-                                {classes[this.state.class_].scores.map((item) => <option value={item} key={item}>{item}</option>)}
+                                {this.class_().scores.map((item) => <option value={item} key={item}>{item}</option>)}
                             </select>
                         </div>
                     :""}
-                    <ScoreBox bonuses={[ancestries[this.state.ancestry].scores, [
-                        this.state.ancestry_boost, this.state.background_boost1, this.state.background_boost2, this.state.class_boost]]} />
+                    <ScoreBox scores={this.scores(5)} />
                 </Collapse>
+
                 <Collapse parent="steps" id="step6" name="Step #6: Determine Ability Scores">
                     <p>Apply four free ability boosts to your scores, choosing a different ability score for each.</p>
                     <div className="form-group input-group">
@@ -310,21 +390,33 @@ class Application extends React.Component {
                             ).map((item) => <option value={item} key={item}>{item}</option>)}
                         </select>
                     </div>
-                    <ScoreBox bonuses={[ancestries[this.state.ancestry].scores, [
-                        this.state.ancestry_boost, this.state.background_boost1, this.state.background_boost2, this.state.class_boost,
-                        this.state.boost1, this.state.boost2, this.state.boost3, this.state.boost4]]} />
+                    <ScoreBox scores={this.scores(6)} />
                 </Collapse>
+
                 <Collapse parent="steps" id="step7" name="Step #7: Record Class Details">
                     <p>Now, record all the benefits and class features that your character receives from the class you've chosen.</p>
                     {(this.state.class_) ?
-                        <div>
-                            <p>Class: {this.state.class}</p>
-                            <p>Calculate HP</p>
-                            <p>Initial Proficiencies</p>
-                            <p>1st level features</p>
-                        </div>
+                        <ul className="container-fluid">
+                            <li className="row border rounded-pill" key="class">
+                                <div className="col-2">Class</div>
+                                <div className="col">{this.state.class}</div>
+                            </li>
+                            <li className="row border rounded-pill" key="hp">
+                                <div className="col-2">Hit Points (HP)</div>
+                                <div className="col">{this.ancestry().hp + this.class_().hp + parseInt(this.scores().Constitution / 2 - 5)}</div>
+                            </li>
+                            <li className="row border rounded-pill" key="proficiencies">
+                                <div className="col-2">Initial proficiencies</div>
+                                <div className="col">{this.state.class}</div>
+                            </li>
+                            <li className="row border rounded-pill" key="features">
+                                <div className="col-2">1st level features</div>
+                                <div className="col">{this.state.class}</div>
+                            </li>
+                        </ul>
                     :""}
                 </Collapse>
+
                 <Collapse parent="steps" id="step8" name="Step #8: Buy Equipment">
                     <p>At 1st level your character has 15 gold pieces (150 silver pieces) to spend on armor, weapons, and other basic equipment.</p>
                     <div className="form-group input-group">
@@ -334,13 +426,29 @@ class Application extends React.Component {
                         <textarea id="equipment" className="form-control" rows="4" value={this.state.equipment} onChange={this.handleChange}></textarea>
                     </div>
                 </Collapse>
+
                 <Collapse parent="steps" id="step9" name="Step #9: Calculate Modifiers">
                     <p>Your modifiers are calculated here.</p>
-                    <p>Perception</p>
-                    <p>Saving Throws</p>
-                    <p>Melee Strikes and Ranged Strikes</p>
-                    <p>Skills</p>
+                    <ul className="container-fluid">
+                        <li className="row border rounded-pill" key="perception">
+                            <div className="col-2">Perception</div>
+                            <div className="col"></div>
+                        </li>
+                        <li className="row border rounded-pill" key="saving_throws">
+                            <div className="col-2">Saving Throws</div>
+                            <div className="col"></div>
+                        </li>
+                        <li className="row border rounded-pill" key="strikes">
+                            <div className="col-2">Melee Strikes and Ranged Strikes</div>
+                            <div className="col"></div>
+                        </li>
+                        <li className="row border rounded-pill" key="skills">
+                            <div className="col-2">Skills</div>
+                            <div className="col"></div>
+                        </li>
+                    </ul>
                 </Collapse>
+
                 <Collapse parent="steps" id="step10" name="Step #10: Finishing Details">
                     <p>Now add the following details to your character sheet in the apropriate spaces.</p>
                     <div className="form-group input-group">
@@ -388,30 +496,10 @@ class Application extends React.Component {
     }
 }
 
-function calcScores(bonuses) {
-    const scores = {"": 0};
-    stats.forEach((stat) => scores[stat] = 10);
-    for (let data of bonuses) {
-        if (Array.isArray(data)) {
-            for (let score of data) {
-                scores[score] += 2;
-            }
-        }
-        else {
-            for (let score of Object.keys(data)) {
-                scores[score] += data[score];
-            }
-        }
-    }
-    delete scores[""];
-    return scores;
-}
-
 function ScoreBox(props) {
-    const scores = calcScores(props.bonuses);
     return (
         <ul className="container-fluid">
-            {Object.entries(scores).map((item) =>
+            {Object.entries(props.scores).map((item) =>
                 (<li className="row border rounded-pill" key={item[0]}>
                     <div className="col-1">{item[1]}</div>
                     <div className="col">{item[0]}</div>
