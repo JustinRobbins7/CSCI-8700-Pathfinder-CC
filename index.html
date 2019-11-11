@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>PF2 Character Builder</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+</head>
+<body>
+<div id="app">
+</div>
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react@16/umd/react.development.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js" crossorigin></script>
+<script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+<script>
+const stats = ["Strength", "Dexterity", "Constitution", "Intelligence", "Wisdom", "Charisma"];
+
+const ancestries = {
+    "": {
+        scores: {}
+    },
+    "Dwarf": {
+        scores: {
+            "Constitution": +2,
+            "Wisdom": +2,
+            "Charisma": -2
+        }
+    }
+};
+
+const backgrounds = {
+    "": {
+        boost1: [],
+        boost2: []
+    },
+    "Nomad": {
+        boost1: ["Constitution", "Wisdom"],
+        boost2: stats
+    }
+};
+
+const classes = {
+    "": {
+        scores: []
+    },
+    "Druid": {
+        scores: [
+            "Wisdom"
+        ]
+    }
+};
+</script>
+<script type="text/babel">
+function Accordion(props) {
+    return (
+        <div className={"accordion " + props.class} id={props.id}>
+            {props.children}
+        </div>
+    );
+}
+
+function Collapse(props) {
+    return (
+        <div className="card">
+            <div className="card-header" id={props.id + "-toggle"}>
+                <h2 className="mb-0">
+                <button className="btn btn-link collapsed" type="button" data-toggle="collapse" data-target={"#" + props.id} aria-expanded="false" aria-controls={props.id}>
+                    {props.name}
+                </button>
+                </h2>
+            </div>
+            <div id={props.id} className="collapse" aria-labelledby={props.id + "-toggle"} data-parent={"#" + props.parent}>
+                <div className="card-body">
+                    {props.children}
+                </div>
+            </div>
+        </div>
+    );
+}
+
+class Application extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            notes: "",
+            ancestry: "",
+            background: "",
+            background_boost1: "",
+            background_boost2: "",
+            class_: "",
+            ancestry_boost: "",
+            class_boost: "",
+            boost1: "",
+            boost2: "",
+            boost3: "",
+            boost4: "",
+            equipment: "",
+            alignment: "",
+            deity: "",
+            age: "",
+            gender: ""
+        };
+        this.handleChange = this.handleChange.bind(this);
+    }
+
+    handleChange(event) {
+        this.setState({[event.target.id]: event.target.value});
+    }
+
+    render() {
+        return (<form>
+            <div className="alert alert-dark" role="alert">
+                <h1 className="text-center">PF2 Character Builder</h1>
+            </div>
+            <Accordion id="steps">
+                <Collapse parent="steps" id="step1" name="Step #1: Create a Concept">
+                    <p>Start planning your character.</p>
+                    <div className="form-group input-group">
+                        <div className="input-group-prepend">
+                            <label className="input-group-text" htmlFor="notes">Character Notes</label>
+                        </div>
+                        <textarea id="notes" className="form-control" rows="4" value={this.state.notes} onChange={this.handleChange}></textarea>
+                    </div>
+                </Collapse>
+                <Collapse parent="steps" id="step2" name="Step #2: Start Building Ability Scores">
+                    <p>Write down 10 for every ability score</p>
+                    <ScoreBox bonuses={[]} />
+                </Collapse>
+                <Collapse parent="steps" id="step3" name="Step #3: Select an Ancestry">
+                    <p>Your character's ancestry determines their size, speed, languages, some of their hp, plus ability boosts and flaws.</p>
+                    <div className="form-group input-group">
+                        <div className="input-group-prepend">
+                            <label className="input-group-text" htmlFor="ancestry">Ancestry</label>
+                        </div>
+                        <select id="ancestry" className="form-control custom-select" value={this.state.ancestry} onChange={this.handleChange}>
+                            <option value="" key="">&darr;</option>
+                            {Object.keys(ancestries).slice(1).map((item) => <option value={item} key={item}>{item}</option>)}
+                        </select>
+                    </div>
+                    {(this.state.ancestry) ?
+                        <div className="form-group input-group">
+                            <div className="input-group-prepend">
+                                <label className="input-group-text" htmlFor="ancestry_boost">Free Ability Boost</label>
+                            </div>
+                            <select id="ancestry_boost" className="form-control custom-select" value={this.state.ancestry_boost} onChange={this.handleChange}>
+                                <option value="" key="">&darr;</option>
+                                {stats.map((item) => <option value={item} key={item}>{item}</option>)}
+                            </select>
+                        </div>
+                    :""}
+                    <ScoreBox bonuses={[ancestries[this.state.ancestry].scores, [this.state.ancestry_boost]]} />
+                </Collapse>
+                <Collapse parent="steps" id="step4" name="Step #4: Pick a Background">
+                    <p>Your character's background represents their upbringing, an aptitude they've been honing since their youth, or another aspect of their life before they became an adventuer.</p>
+                    <div className="form-group input-group">
+                        <div className="input-group-prepend">
+                            <label className="input-group-text" htmlFor="background">Background</label>
+                        </div>
+                        <select id="background" className="form-control custom-select" value={this.state.background} onChange={this.handleChange}>
+                            <option value="" key="">&darr;</option>
+                            {Object.keys(backgrounds).slice(1).map((item) => <option value={item} key={item}>{item}</option>)}
+                        </select>
+                    </div>
+                    {(this.state.background) ?
+                        <div>
+                            <div className="form-group input-group">
+                                <div className="input-group-prepend">
+                                    <label className="input-group-text" htmlFor="background_boost1">Background Ability Boost</label>
+                                </div>
+                                <select id="background_boost1" className="form-control custom-select" value={this.state.background_boost1} onChange={this.handleChange}>
+                                    <option value="" key="">&darr;</option>
+                                    {backgrounds[this.state.background].boost1.filter(
+                                        (item) => item != this.state.background_boost2
+                                    ).map((item) => <option value={item} key={item}>{item}</option>)}
+                                </select>
+                            </div>
+                            <div className="form-group input-group">
+                                <div className="input-group-prepend">
+                                    <label className="input-group-text" htmlFor="background_boost2">Background Ability Boost</label>
+                                </div>
+                                <select id="background_boost2" className="form-control custom-select" value={this.state.background_boost2} onChange={this.handleChange}>
+                                    <option value="" key="">&darr;</option>
+                                    {backgrounds[this.state.background].boost2.filter(
+                                        (item) => item != this.state.background_boost1
+                                    ).map((item) => <option value={item} key={item}>{item}</option>)}
+                                </select>
+                            </div>
+                        </div>
+                    :""}
+                    <ScoreBox bonuses={[ancestries[this.state.ancestry].scores, [this.state.ancestry_boost, this.state.background_boost1, this.state.background_boost2]]} />
+                </Collapse>
+                <Collapse parent="steps" id="step5" name="Step #5: Choose a Class">
+                    <p>A class gives your character access to a suite of heroic abilities, determines how effectively they fight, and governs how easily they can shake off or avoid certain harmful effects.</p>
+                    <div className="form-group input-group">
+                        <div className="input-group-prepend">
+                            <label className="input-group-text" htmlFor="class_">Class</label>
+                        </div>
+                        <select id="class_" className="form-control custom-select" value={this.state.class_} onChange={this.handleChange}>
+                            <option value="" key="">&darr;</option>
+                            {Object.keys(classes).slice(1).map((item) => <option value={item} key={item}>{item}</option>)}
+                        </select>
+                    </div>
+                    {(this.state.class_) ?
+                        <div className="form-group input-group">
+                            <div className="input-group-prepend">
+                                <label className="input-group-text" htmlFor="class_boost">Class Ability Boost</label>
+                            </div>
+                            <select id="class_boost" className="form-control custom-select" value={this.state.class_boost} onChange={this.handleChange}>
+                                <option value="" key="">&darr;</option>
+                                {classes[this.state.class_].scores.map((item) => <option value={item} key={item}>{item}</option>)}
+                            </select>
+                        </div>
+                    :""}
+                    <ScoreBox bonuses={[ancestries[this.state.ancestry].scores, [
+                        this.state.ancestry_boost, this.state.background_boost1, this.state.background_boost2, this.state.class_boost]]} />
+                </Collapse>
+                <Collapse parent="steps" id="step6" name="Step #6: Determine Ability Scores">
+                    <p>Apply four free ability boosts to your scores, choosing a different ability score for each.</p>
+                    <div className="form-group input-group">
+                        <div className="input-group-prepend">
+                            <label className="input-group-text" htmlFor="boost1">Ability Boost</label>
+                        </div>
+                        <select id="boost1" className="form-control custom-select" value={this.state.boost1} onChange={this.handleChange}>
+                            <option value="" key="">&darr;</option>
+                            {stats.filter(
+                                (item) => ![this.state.boost2, this.state.boost3, this.state.boost4].includes(item)
+                            ).map((item) => <option value={item} key={item}>{item}</option>)}
+                        </select>
+                    </div>
+                    <div className="form-group input-group">
+                        <div className="input-group-prepend">
+                            <label className="input-group-text" htmlFor="boost2">Ability Boost</label>
+                        </div>
+                        <select id="boost2" className="form-control custom-select" value={this.state.boost2} onChange={this.handleChange}>
+                            <option value="" key="">&darr;</option>
+                            {stats.filter(
+                                (item) => ![this.state.boost1, this.state.boost3, this.state.boost4].includes(item)
+                            ).map((item) => <option value={item} key={item}>{item}</option>)}
+                        </select>
+                    </div>
+                    <div className="form-group input-group">
+                        <div className="input-group-prepend">
+                            <label className="input-group-text" htmlFor="boost3">Ability Boost</label>
+                        </div>
+                        <select id="boost3" className="form-control custom-select" value={this.state.boost3} onChange={this.handleChange}>
+                            <option value="" key="">&darr;</option>
+                            {stats.filter(
+                                (item) => ![this.state.boost1, this.state.boost2, this.state.boost4].includes(item)
+                            ).map((item) => <option value={item} key={item}>{item}</option>)}
+                        </select>
+                    </div>
+                    <div className="form-group input-group">
+                        <div className="input-group-prepend">
+                            <label className="input-group-text" htmlFor="boost4">Ability Boost</label>
+                        </div>
+                        <select id="boost4" className="form-control custom-select" value={this.state.boost4} onChange={this.handleChange}>
+                            <option value="" key="">&darr;</option>
+                            {stats.filter(
+                                (item) => ![this.state.boost1, this.state.boost2, this.state.boost3].includes(item)
+                            ).map((item) => <option value={item} key={item}>{item}</option>)}
+                        </select>
+                    </div>
+                    <ScoreBox bonuses={[ancestries[this.state.ancestry].scores, [
+                        this.state.ancestry_boost, this.state.background_boost1, this.state.background_boost2, this.state.class_boost,
+                        this.state.boost1, this.state.boost2, this.state.boost3, this.state.boost4]]} />
+                </Collapse>
+                <Collapse parent="steps" id="step7" name="Step #7: Record Class Details">
+                    <p>Now, record all the benefits and class features that your character receives from the class you've chosen.</p>
+                    {(this.state.class_) ?
+                        <div>
+                            <p>Class: {this.state.class}</p>
+                            <p>Calculate HP</p>
+                            <p>Initial Proficiencies</p>
+                            <p>1st level features</p>
+                        </div>
+                    :""}
+                </Collapse>
+                <Collapse parent="steps" id="step8" name="Step #8: Buy Equipment">
+                    <p>At 1st level your character has 15 gold pieces (150 silver pieces) to spend on armor, weapons, and other basic equipment.</p>
+                    <div className="form-group input-group">
+                        <div className="input-group-prepend">
+                            <label className="input-group-text" htmlFor="equipment">Equipment</label>
+                        </div>
+                        <textarea id="equipment" className="form-control" rows="4" value={this.state.equipment} onChange={this.handleChange}></textarea>
+                    </div>
+                </Collapse>
+                <Collapse parent="steps" id="step9" name="Step #9: Calculate Modifiers">
+                    <p>Your modifiers are calculated here.</p>
+                    <p>Perception</p>
+                    <p>Saving Throws</p>
+                    <p>Melee Strikes and Ranged Strikes</p>
+                    <p>Skills</p>
+                </Collapse>
+                <Collapse parent="steps" id="step10" name="Step #10: Finishing Details">
+                    <p>Now add the following details to your character sheet in the apropriate spaces.</p>
+                    <div className="form-group input-group">
+                        <div className="input-group-prepend">
+                            <label className="input-group-text" htmlFor="alignment">Alignment</label>
+                        </div>
+                        <select id="alignment" className="form-control custom-select" value={this.state.alignment} onChange={this.handleChange}>
+                            <option value="" key="">&darr;</option>
+                            <option value="Lawful Good" key="Lawful Good">Lawful Good</option>
+                            <option value="Neutral Good" key="Neutral Good">Neutral Good</option>
+                            <option value="Chaotic Good" key="Chaotic Good">Chaotic Good</option>
+                            <option value="Lawful Neutral" key="Lawful Neutral">Lawful Neutral</option>
+                            <option value="True Neutral" key="True Neutral">True Neutral</option>
+                            <option value="Chaotic Neutral" key="Chaotic Neutral">Chaotic Neutral</option>
+                            <option value="Lawful Evil" key="Lawful Evil">Lawful Evil</option>
+                            <option value="Neutral Evil" key="Neutral Evil">Neutral Evil</option>
+                            <option value="Chaotic Evil" key="Chaotic Evil">Chaotic Evil</option>
+                        </select>
+                    </div>
+                    <div className="form-group input-group">
+                        <div className="input-group-prepend">
+                            <label className="input-group-text" htmlFor="deity">Deity</label>
+                        </div>
+                        <input type="text" id="deity" className="form-control" value={this.state.deity} onChange={this.handleChange} />
+                    </div>
+                    <div className="form-group input-group">
+                        <div className="input-group-prepend">
+                            <label className="input-group-text" htmlFor="age">Age</label>
+                        </div>
+                        <input type="number" id="age" className="form-control" value={this.state.age} onChange={this.handleChange} />
+                    </div>
+                    <div className="form-group input-group">
+                        <div className="input-group-prepend">
+                            <label className="input-group-text" htmlFor="gender">Gender and Pronouns</label>
+                        </div>
+                        <input type="text" id="gender" className="form-control" value={this.state.gender} onChange={this.handleChange} />
+                    </div>
+                    <p>Class DC</p>
+                    <p>Hero Points</p>
+                    <p>Armor Class (AC)</p>
+                    <p>Bulk</p>
+                </Collapse>
+            </Accordion>
+        </form>);
+    }
+}
+
+function calcScores(bonuses) {
+    const scores = {"": 0};
+    stats.forEach((stat) => scores[stat] = 10);
+    for (let data of bonuses) {
+        if (Array.isArray(data)) {
+            for (let score of data) {
+                scores[score] += 2;
+            }
+        }
+        else {
+            for (let score of Object.keys(data)) {
+                scores[score] += data[score];
+            }
+        }
+    }
+    delete scores[""];
+    return scores;
+}
+
+function ScoreBox(props) {
+    const scores = calcScores(props.bonuses);
+    return (
+        <ul className="container-fluid">
+            {Object.entries(scores).map((item) =>
+                (<li className="row border rounded-pill" key={item[0]}>
+                    <div className="col-1">{item[1]}</div>
+                    <div className="col">{item[0]}</div>
+                </li>))}
+        </ul>
+    );
+}
+
+ReactDOM.render(
+    <Application />,
+    document.getElementById("app")
+)
+</script>
+</body>
+</html>
