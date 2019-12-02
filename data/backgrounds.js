@@ -238,7 +238,7 @@ const backgrounds = {
         skill2: ["City Lore"]
     },
 	"Tinker": {
-        boost1: ["Dexterity", "Intellihence"],
+        boost1: ["Dexterity", "Intelligence"],
         boost2: stats,
         skill_feat: "Specialty Crafting",
         skill1: "Crafting",
