@@ -94,7 +94,7 @@ const classes = {
         skills: {
             "Perception": Expert,
 			"Acrobatics": Trained,
-			"Athletics", Trained
+			"Athletics": Trained
         },
         bonus_skills: 3,
         attacks: {
