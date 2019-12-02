@@ -58,12 +58,21 @@ class Application extends React.Component {
             background: "",
             background_boost1: "",
             background_boost2: "",
+            background_lore: "",
             class_: "",
+            subclass: "",
             class_boost: "",
             boost1: "",
             boost2: "",
             boost3: "",
             boost4: "",
+            bonus_skill1: "",
+            bonus_skill2: "",
+            bonus_skill3: "",
+            bonus_skill4: "",
+            bonus_skill5: "",
+            bonus_skill6: "",
+            bonus_skill7: "",
             equipment: "",
             alignment: "",
             deity: "",
@@ -73,9 +82,14 @@ class Application extends React.Component {
         this.handleChange = this.handleChange.bind(this);
         this.bonuses = this.bonuses.bind(this);
         this.scores = this.scores.bind(this);
+        this.skill = this.skill.bind(this);
+        this.skills = this.skills.bind(this);
+        this.attacks = this.attacks.bind(this);
+        this.defenses = this.defenses.bind(this);
         this.ancestry = this.ancestry.bind(this);
         this.background = this.background.bind(this);
         this.class_ = this.class_.bind(this);
+        this.subclass = this.subclass.bind(this);
     }
 
     bonuses(step) {
@@ -115,12 +129,108 @@ class Application extends React.Component {
         return scores;
     }
 
+    skills(step) {
+        if (step === undefined) {
+            step = 10;
+        }
+        const steps = [
+            [],
+            [],
+            [],
+            [this.background().skill1, this.state.background_lore],
+            Object.keys(this.class_().skills).concat(Object.keys(this.subclass().skills)),
+            [],
+            [this.state.bonus_skill1, this.state.bonus_skill2, this.state.bonus_skill3, this.state.bonus_skill4, this.state.bonus_skill5, this.state.bonus_skill6, this.state.bonus_skill7]
+        ];
+        let out = [];
+        for (let i = 0; i < Math.min(steps.length, step); i++) {
+            out = out.concat(steps[i]);
+        }
+        return out;
+    }
+
+    skill(name, step) {
+        if (step === undefined) {
+            step = 10;
+        }
+        let prof = 0;
+        if (this.skills(step).includes(name)) {
+            prof = 2;
+        }
+        if (step >= 5) {
+            let c = (this.state.class_ && this.class_().skills[name]) ? this.class_().skills[name] : 0;
+            let sc = (this.state.subclass && this.subclass().skills[name]) ? this.subclass().skills[name] : 0;
+            prof = Math.max(prof, c, sc);
+        }
+        return prof;
+    }
+
+    ranks(step) {
+        if (step === undefined) {
+            step = 10;
+        }
+        let ranks = {};
+        for (let skill of skills) {
+            let rank = this.skill(skill, step);
+            ranks[skill] = rank;
+        }
+        return ranks;
+    }
+
+    attacks(step) {
+        if (step === undefined) {
+            step = 10;
+        }
+        let steps = [
+            [],
+            [],
+            [],
+            [],
+            Object.keys(this.class_().attacks).concat(Object.keys(this.subclass().attacks))
+        ];
+        let out = [];
+        for (let i = 0; i < Math.min(steps.length, step); i++) {
+            out = out.concat(steps[i]);
+        }
+        return out;
+    }
+
+    defenses(step) {
+        if (step === undefined) {
+            step = 10;
+        }
+        let steps = [
+            [],
+            [],
+            [],
+            [],
+            Object.keys(this.class_().defenses).concat(Object.keys(this.subclass().defenses))
+        ];
+        let out = [];
+        for (let i = 0; i < Math.min(steps.length, step); i++) {
+            out = out.concat(steps[i]);
+        }
+        return out;
+    }
+
     handleChange(event) {
         this.setState({[event.target.id]: event.target.value});
         if (event.target.id == "ancestry") {
             this.setState({
                 ancestry_boost1: "",
                 ancestry_boost2: ""
+            })
+        }
+        else if (event.target.id == "class_") {
+            this.setState({
+                subclass: "",
+                bonus_skill1: "",
+                bonus_skill2: "",
+                bonus_skill3: "",
+                bonus_skill4: "",
+                bonus_skill5: "",
+                bonus_skill6: "",
+                bonus_skill7: ""
             })
         }
     }
@@ -135,6 +245,10 @@ class Application extends React.Component {
 
     class_() {
         return classes[this.state.class_];
+    }
+
+    subclass() {
+        return classes[this.state.class_].subclasses[this.state.subclass] || classes[""].subclasses[""];
     }
 
     render() {
@@ -233,6 +347,21 @@ class Application extends React.Component {
                                     ).map((item) => <option value={item} key={item}>{item}</option>)}
                                 </select>
                             </div>
+                            <div className="form-group input-group">
+                                <div className="input-group-prepend">
+                                    <label className="input-group-text" htmlFor="background_skill">Background Skill</label>
+                                </div>
+                                <input type="text" id="background_skill" className="form-control" value={this.background().skill1} disabled={true} />
+                            </div>
+                            <div className="form-group input-group">
+                                <div className="input-group-prepend">
+                                    <label className="input-group-text" htmlFor="background_lore">Background Lore Skill</label>
+                                </div>
+                                <select id="background_lore" className="form-control custom-select" value={this.state.background_lore} onChange={this.handleChange}>
+                                    <option value="" key="">&darr;</option>
+                                    {this.background().skill2.map((item) => <option value={item} key={item}>{item}</option>)}
+                                </select>
+                            </div>
                         </div>
                     :""}
                     <ScoreBox scores={this.scores(4)} />
@@ -250,14 +379,25 @@ class Application extends React.Component {
                         </select>
                     </div>
                     {(this.state.class_) ?
-                        <div className="form-group input-group">
-                            <div className="input-group-prepend">
-                                <label className="input-group-text" htmlFor="class_boost">Class Ability Boost</label>
+                        <div>
+                            <div className="form-group input-group">
+                                <div className="input-group-prepend">
+                                    <label className="input-group-text" htmlFor="subclass">Subclass</label>
+                                </div>
+                                <select id="subclass" className="form-control custom-select" value={this.state.subclass} onChange={this.handleChange}>
+                                    <option value="" key="">&darr;</option>
+                                    {Object.keys(this.class_().subclasses).map((item) => <option value={item} key={item}>{item}</option>)}
+                                </select>
                             </div>
-                            <select id="class_boost" className="form-control custom-select" value={this.state.class_boost} onChange={this.handleChange}>
-                                <option value="" key="">&darr;</option>
-                                {this.class_().scores.map((item) => <option value={item} key={item}>{item}</option>)}
-                            </select>
+                            <div className="form-group input-group">
+                                <div className="input-group-prepend">
+                                    <label className="input-group-text" htmlFor="class_boost">Class Ability Boost</label>
+                                </div>
+                                <select id="class_boost" className="form-control custom-select" value={this.state.class_boost} onChange={this.handleChange}>
+                                    <option value="" key="">&darr;</option>
+                                    {this.class_().scores.map((item) => <option value={item} key={item}>{item}</option>)}
+                                </select>
+                            </div>
                         </div>
                     :""}
                     <ScoreBox scores={this.scores(5)} />
@@ -315,24 +455,154 @@ class Application extends React.Component {
                 <Collapse parent="steps" id="step7" name="Step #7: Record Class Details">
                     <p>Now, record all the benefits and class features that your character receives from the class you've chosen.</p>
                     {(this.state.class_) ?
-                        <ul className="container-fluid">
-                            <li className="row border rounded-pill" key="class">
-                                <div className="col-2">Class</div>
-                                <div className="col">{this.state.class}</div>
-                            </li>
-                            <li className="row border rounded-pill" key="hp">
-                                <div className="col-2">Hit Points (HP)</div>
-                                <div className="col">{this.ancestry().hp + this.class_().hp + parseInt(this.scores().Constitution / 2 - 5)}</div>
-                            </li>
-                            <li className="row border rounded-pill" key="proficiencies">
-                                <div className="col-2">Initial proficiencies</div>
-                                <div className="col">{this.state.class}</div>
-                            </li>
-                            <li className="row border rounded-pill" key="features">
-                                <div className="col-2">1st level features</div>
-                                <div className="col">{this.state.class}</div>
-                            </li>
-                        </ul>
+                        <div>
+                            <ul className="container-fluid">
+                                <li className="row border rounded-pill" key="class">
+                                    <div className="col-2">Class</div>
+                                    <div className="col">{this.state.class_}</div>
+                                </li>
+                                <li className="row border rounded-pill" key="hp">
+                                    <div className="col-2">Hit Points (HP)</div>
+                                    <div className="col">{this.ancestry().hp + this.class_().hp + parseInt(this.scores().Constitution / 2 - 5)}</div>
+                                </li>
+                                {Object.entries(this.ranks(6)).filter((item) => item[1] > 0).map((item) =>
+                                    <li className="row border rounded-pill" key={item[0]}>
+                                        <div className="col-2">{item[0]}</div>
+                                        <div className="col">{ranks[item[1]]}</div>
+                                    </li>
+                                )}
+                                {this.attacks(7).map((item) =>
+                                    <li className="row border rounded-pill" key={item}>
+                                        <div className="col-2">{item}</div>
+                                        <div className="col">{ranks[2]}</div>
+                                    </li>
+                                )}
+                                {this.defenses(7).map((item) =>
+                                    <li className="row border rounded-pill" key={item}>
+                                        <div className="col-2">{item}</div>
+                                        <div className="col">{ranks[2]}</div>
+                                    </li>
+                                )}
+                                <li className="row border rounded-pill" key="features">
+                                    <div className="col-2">1st level features</div>
+                                    <div className="col">{this.state.class_}</div>
+                                </li>
+                            </ul>
+                            <div className="form-group input-group">
+                                <div className="input-group-prepend">
+                                    <label className="input-group-text" htmlFor="boost4">Ability Boost</label>
+                                </div>
+                                <select id="boost4" className="form-control custom-select" value={this.state.boost4} onChange={this.handleChange}>
+                                    <option value="" key="">&darr;</option>
+                                    {stats.filter(
+                                        (item) => ![this.state.boost1, this.state.boost2, this.state.boost3].includes(item)
+                                    ).map((item) => <option value={item} key={item}>{item}</option>)}
+                                </select>
+                            </div>
+                            <div className="form-group input-group">
+                                <div className="input-group-prepend">
+                                    <label className="input-group-text" htmlFor="bonus_skill1">Bonus Skill</label>
+                                </div>
+                                <select id="bonus_skill1" className="form-control custom-select" value={this.state.bonus_skill1} onChange={this.handleChange}>
+                                    <option value="" key="">&darr;</option>
+                                    {skills.filter(
+                                        (item) => !this.skills(6).concat([
+                                            this.state.bonus_skill2, this.state.bonus_skill3, this.state.bonus_skill4,
+                                            this.state.bonus_skill5, this.state.bonus_skill6, this.state.bonus_skill7]).includes(item)
+                                    ).map((item) => <option value={item} key={item}>{item}</option>)}
+                                </select>
+                            </div>
+                        </div>
+                    :""}
+                    {(this.state.class_ && this.class_().bonus_skills >= 2) ?
+                        <div className="form-group input-group">
+                            <div className="input-group-prepend">
+                                <label className="input-group-text" htmlFor="bonus_skill2">Bonus Skill</label>
+                            </div>
+                            <select id="bonus_skill2" className="form-control custom-select" value={this.state.bonus_skill2} onChange={this.handleChange}>
+                                <option value="" key="">&darr;</option>
+                                {skills.filter(
+                                    (item) => !this.skills(6).concat([
+                                        this.state.bonus_skill1, this.state.bonus_skill3, this.state.bonus_skill4,
+                                        this.state.bonus_skill5, this.state.bonus_skill6, this.state.bonus_skill7]).includes(item)
+                                ).map((item) => <option value={item} key={item}>{item}</option>)}
+                            </select>
+                        </div>
+                    :""}
+                    {(this.state.class_ && this.class_().bonus_skills >= 3) ?
+                        <div className="form-group input-group">
+                            <div className="input-group-prepend">
+                                <label className="input-group-text" htmlFor="bonus_skill3">Bonus Skill</label>
+                            </div>
+                            <select id="bonus_skill3" className="form-control custom-select" value={this.state.bonus_skill3} onChange={this.handleChange}>
+                                <option value="" key="">&darr;</option>
+                                {skills.filter(
+                                    (item) => !this.skills(6).concat([
+                                        this.state.bonus_skill1, this.state.bonus_skill2, this.state.bonus_skill4,
+                                        this.state.bonus_skill5, this.state.bonus_skill6, this.state.bonus_skill7]).includes(item)
+                                ).map((item) => <option value={item} key={item}>{item}</option>)}
+                            </select>
+                        </div>
+                    :""}
+                    {(this.state.class_ && this.class_().bonus_skills >= 4) ?
+                        <div className="form-group input-group">
+                            <div className="input-group-prepend">
+                                <label className="input-group-text" htmlFor="bonus_skill4">Bonus Skill</label>
+                            </div>
+                            <select id="bonus_skill4" className="form-control custom-select" value={this.state.bonus_skill4} onChange={this.handleChange}>
+                                <option value="" key="">&darr;</option>
+                                {skills.filter(
+                                    (item) => !this.skills(6).concat([
+                                        this.state.bonus_skill1, this.state.bonus_skill2, this.state.bonus_skill3,
+                                        this.state.bonus_skill5, this.state.bonus_skill6, this.state.bonus_skill7]).includes(item)
+                                ).map((item) => <option value={item} key={item}>{item}</option>)}
+                            </select>
+                        </div>
+                    :""}
+                    {(this.state.class_ && this.class_().bonus_skills >= 5) ?
+                        <div className="form-group input-group">
+                            <div className="input-group-prepend">
+                                <label className="input-group-text" htmlFor="bonus_skill5">Bonus Skill</label>
+                            </div>
+                            <select id="bonus_skill5" className="form-control custom-select" value={this.state.bonus_skill5} onChange={this.handleChange}>
+                                <option value="" key="">&darr;</option>
+                                {skills.filter(
+                                    (item) => !this.skills(6).concat([
+                                        this.state.bonus_skill1, this.state.bonus_skill2, this.state.bonus_skill3,
+                                        this.state.bonus_skill4, this.state.bonus_skill6, this.state.bonus_skill7]).includes(item)
+                                ).map((item) => <option value={item} key={item}>{item}</option>)}
+                            </select>
+                        </div>
+                    :""}
+                    {(this.state.class_ && this.class_().bonus_skills >= 6) ?
+                        <div className="form-group input-group">
+                            <div className="input-group-prepend">
+                                <label className="input-group-text" htmlFor="bonus_skill6">Bonus Skill</label>
+                            </div>
+                            <select id="bonus_skill6" className="form-control custom-select" value={this.state.bonus_skill6} onChange={this.handleChange}>
+                                <option value="" key="">&darr;</option>
+                                {skills.filter(
+                                    (item) => !this.skills(6).concat([
+                                        this.state.bonus_skill1, this.state.bonus_skill2, this.state.bonus_skill3,
+                                        this.state.bonus_skill4, this.state.bonus_skill5, this.state.bonus_skill7]).includes(item)
+                                ).map((item) => <option value={item} key={item}>{item}</option>)}
+                            </select>
+                        </div>
+                    :""}
+                    {(this.state.class_ && this.class_().bonus_skills >= 7) ?
+                        <div className="form-group input-group">
+                            <div className="input-group-prepend">
+                                <label className="input-group-text" htmlFor="bonus_skill7">Bonus Skill</label>
+                            </div>
+                            <select id="bonus_skill7" className="form-control custom-select" value={this.state.bonus_skill7} onChange={this.handleChange}>
+                                <option value="" key="">&darr;</option>
+                                {skills.filter(
+                                    (item) => !this.skills(6).concat([
+                                        this.state.bonus_skill1, this.state.bonus_skill2, this.state.bonus_skill3,
+                                        this.state.bonus_skill4, this.state.bonus_skill5, this.state.bonus_skill6]).includes(item)
+                                ).map((item) => <option value={item} key={item}>{item}</option>)}
+                            </select>
+                        </div>
                     :""}
                 </Collapse>
 
@@ -351,7 +621,7 @@ class Application extends React.Component {
                     <ul className="container-fluid">
                         <li className="row border rounded-pill" key="perception">
                             <div className="col-2">Perception</div>
-                            <div className="col"></div>
+                            <div className="col">{this.skill("Perception", 9)}</div>
                         </li>
                         <li className="row border rounded-pill" key="saving_throws">
                             <div className="col-2">Saving Throws</div>

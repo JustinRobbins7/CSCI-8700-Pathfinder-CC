@@ -1,9 +1,14 @@
 const classes = {
     "": {
-        saving_throws: {},
+        saving_throws: {
+            "Fortitude": Untrained,
+            "Reflex": Untrained,
+            "Will": Untrained
+        },
         skills: {},
         bonus_skills: 0,
         attacks: {},
+        defenses: {},
         scores: [],
         hp: 0,
         features: [],
@@ -11,6 +16,8 @@ const classes = {
             "": {
                 skills: {},
                 bonus_skills: 0,
+                attacks: {},
+                defenses: {},
                 feats: [],
                 spells: []
             }
@@ -32,7 +39,7 @@ const classes = {
             "Simple Attacks": Trained,
             "Unarmed Attacks": Trained
         },
-        "defenses": {
+        defenses: {
             "Light Armor": Trained,
             "Medium Armor": Trained,
             "Unarmored Defense": Trained
@@ -55,6 +62,8 @@ const classes = {
                     "Athletics": Trained
                 },
                 bonus_skills: 0,
+                attacks: {},
+                defenses: {},
                 feats: ["Animal Companion"],
                 spells: ["Heal Animal"]
             },
@@ -63,6 +72,8 @@ const classes = {
                     "Diplomacy": Trained
                 },
                 bonus_skills: 0,
+                attacks: {},
+                defenses: {},
                 feats: ["Leshy Familiar"],
                 spells: ["Goodberry"]
             },
@@ -71,6 +82,8 @@ const classes = {
                     "Acrobatics": Trained
                 },
                 bonus_skills: 0,
+                attacks: {},
+                defenses: {},
                 feats: ["Storm Born"],
                 spells: ["Tempest Surge"]
             },
@@ -79,6 +92,8 @@ const classes = {
                     "Intimidation": Trained
                 },
                 bonus_skills: 0,
+                attacks: {},
+                defenses: {},
                 feats: ["Wild Shape"],
                 spells: ["Wild Morph"]
             }
@@ -103,7 +118,7 @@ const classes = {
 			"Advanced Weapons": Trained,
             "Unarmed Attacks": Expert
         },
-        "defenses": {
+        defenses: {
             "Light Armor": Trained,
             "Medium Armor": Trained,
 			"Heavy Armor": Trained,
@@ -149,7 +164,7 @@ const classes = {
 			"Shortsword": Trained,
             "Unarmed Attacks": Trained
         },
-        "defenses": {
+        defenses: {
             "Light Armor": Trained,
             "Unarmored Defense": Trained
         },
@@ -166,10 +181,13 @@ const classes = {
         subclasses: {
 			"Ruffian": {
                 skills: {
-                    "Intimidation": Trained,
-					"Medium Armor": Trained
+                    "Intimidation": Trained
                 },
                 bonus_skills: 0,
+                attacks: {},
+                defenses: {
+                    "Medium Armor": Trained
+                },
                 feats: [],
                 spells: []
             },
@@ -179,6 +197,8 @@ const classes = {
                     "Diplomacy": Trained
                 },
                 bonus_skills: 0,
+                attacks: {},
+                defenses: {},
                 feats: [],
                 spells: []
             },
@@ -187,6 +207,8 @@ const classes = {
                     "Thievery": Trained
                 },
                 bonus_skills: 0,
+                attacks: {},
+                defenses: {},
                 feats: [],
                 spells: []
             }
@@ -212,7 +234,7 @@ const classes = {
             "Simple Attacks": Trained,
             "Unarmed Attacks": Trained
         },
-        "defenses": {
+        defenses: {
             "Unarmored Defense": Trained
         },
         scores: [
@@ -231,6 +253,8 @@ const classes = {
 					"Occultism": Trained
                 },
                 bonus_skills: 0,
+                attacks: {},
+                defenses: {},
                 feats: [],
                 spells: [
 					"Daze",
@@ -254,6 +278,8 @@ const classes = {
 					"Religion": Trained
                 },
                 bonus_skills: 0,
+                attacks: {},
+                defenses: {},
                 feats: [],
                 spells: [
 					"Light",
@@ -277,6 +303,8 @@ const classes = {
 					"Religion": Trained
                 },
                 bonus_skills: 0,
+                attacks: {},
+                defenses: {},
                 feats: [],
                 spells: [
 					"Acid Splash",
@@ -300,6 +328,8 @@ const classes = {
 					"Intimidation": Trained
                 },
                 bonus_skills: 0,
+                attacks: {},
+                defenses: {},
                 feats: [],
                 spells: [
 					"Shield",
@@ -323,6 +353,8 @@ const classes = {
 					"Nature": Trained
                 },
                 bonus_skills: 0,
+                attacks: {},
+                defenses: {},
                 feats: [],
                 spells: [
 					"Produce Flame",
