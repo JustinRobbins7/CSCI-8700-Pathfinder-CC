@@ -43,9 +43,9 @@ const ancestries = {
         ]
     },
 	"Human": {
-        hp: 8
+        hp: 8,
         size: "Medium",
-        speed: 25
+        speed: 25,
         scores: {},
         free: 2,
         languages: ["Common"],
@@ -79,7 +79,7 @@ const ancestries = {
         },
         free: 1,
         languages: ["Common", "Elven"],
-        language_options: ["Gnomish", "Goblin", "Gnoll" "Celestial", "Orcish", "Draconic", "Sylvan"],
+        language_options: ["Gnomish", "Goblin", "Gnoll", "Celestial", "Orcish", "Draconic", "Sylvan"],
         traits: ["Elf", "Hunamoid"],
         abilities: ["Low Light Vision"],
         heritages: [
