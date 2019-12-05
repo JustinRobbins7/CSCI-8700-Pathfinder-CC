@@ -74,6 +74,7 @@ class Application extends React.Component {
             bonus_skill6: "",
             bonus_skill7: "",
             equipment: "",
+            name: "",
             alignment: "",
             deity: "",
             age: "",
@@ -465,29 +466,12 @@ class Application extends React.Component {
                                     <div className="col-2">Hit Points (HP)</div>
                                     <div className="col">{this.ancestry().hp + this.class_().hp + parseInt(this.scores().Constitution / 2 - 5)}</div>
                                 </li>
-                                {Object.entries(this.ranks(6)).filter((item) => item[1] > 0).map((item) =>
-                                    <li className="row border rounded-pill" key={item[0]}>
-                                        <div className="col-2">{item[0]}</div>
-                                        <div className="col">{ranks[item[1]]}</div>
-                                    </li>
-                                )}
-                                {this.attacks(7).map((item) =>
-                                    <li className="row border rounded-pill" key={item}>
-                                        <div className="col-2">{item}</div>
-                                        <div className="col">{ranks[2]}</div>
-                                    </li>
-                                )}
-                                {this.defenses(7).map((item) =>
-                                    <li className="row border rounded-pill" key={item}>
-                                        <div className="col-2">{item}</div>
-                                        <div className="col">{ranks[2]}</div>
-                                    </li>
-                                )}
                                 <li className="row border rounded-pill" key="features">
                                     <div className="col-2">1st level features</div>
                                     <div className="col">{this.state.class_}</div>
                                 </li>
                             </ul>
+                            <SkillBox ranks={this.ranks(6)} attacks={this.attacks(7)} defenses={this.defenses(7)} />
                             <div className="form-group input-group">
                                 <div className="input-group-prepend">
                                     <label className="input-group-text" htmlFor="boost4">Ability Boost</label>
@@ -640,6 +624,7 @@ class Application extends React.Component {
 
                 <Collapse parent="steps" id="step10" name="Step #10: Finishing Details">
                     <p>Now add the following details to your character sheet in the apropriate spaces.</p>
+                    <Input type="text" id="name" label="Name" value={this.state.name} onChange={this.handleChange} />
                     <div className="form-group input-group">
                         <div className="input-group-prepend">
                             <label className="input-group-text" htmlFor="alignment">Alignment</label>
@@ -657,32 +642,38 @@ class Application extends React.Component {
                             <option value="Chaotic Evil" key="Chaotic Evil">Chaotic Evil</option>
                         </select>
                     </div>
-                    <div className="form-group input-group">
-                        <div className="input-group-prepend">
-                            <label className="input-group-text" htmlFor="deity">Deity</label>
-                        </div>
-                        <input type="text" id="deity" className="form-control" value={this.state.deity} onChange={this.handleChange} />
-                    </div>
-                    <div className="form-group input-group">
-                        <div className="input-group-prepend">
-                            <label className="input-group-text" htmlFor="age">Age</label>
-                        </div>
-                        <input type="number" id="age" className="form-control" value={this.state.age} onChange={this.handleChange} />
-                    </div>
-                    <div className="form-group input-group">
-                        <div className="input-group-prepend">
-                            <label className="input-group-text" htmlFor="gender">Gender and Pronouns</label>
-                        </div>
-                        <input type="text" id="gender" className="form-control" value={this.state.gender} onChange={this.handleChange} />
-                    </div>
-                    <p>Class DC</p>
-                    <p>Hero Points</p>
-                    <p>Armor Class (AC)</p>
-                    <p>Bulk</p>
+                    <Input type="text" id="deity" label="Deity" value={this.state.deity} onChange={this.handleChange} />
+                    <Input type="text" id="age" label="Age" value={this.state.age} onChange={this.handleChange} />
+                    <Input type="text" id="gender" label="Gender and Pronouns" value={this.state.gender} onChange={this.handleChange} />
+                </Collapse>
+
+                <Collapse parent="steps" id="step11" name="Step #11: Finished Sheet">
+                    <Input type="text" id="name-out" label="Name" value={this.state.name} disabled={true} />
+                    <Input type="text" id="alignment-out" label="Alignment" value={this.state.alignment} disabled={true} />
+                    <Input type="text" id="deity-out" label="Deity" value={this.state.deity} disabled={true} />
+                    <Input type="text" id="age-out" label="Age" value={this.state.age} disabled={true} />
+                    <Input type="text" id="gender-out" label="Gender and Pronouns" value={this.state.gender} disabled={true} />
+                    <Input type="text" id="ancestry-out" label="Ancestry" value={this.state.ancestry} disabled={true} />
+                    <Input type="text" id="background-out" label="Background" value={this.state.background} disabled={true} />
+                    <Input type="text" id="class-out" label="Class" value={this.state.class_} disabled={true} />
+                    <Input type="text" id="subclass-out" label="Subclass" value={this.state.subclass} disabled={true} />
+                    <ScoreBox scores={this.scores()} />
+                    <SkillBox ranks={this.ranks()} attacks={this.attacks()} defenses={this.defenses()} />
                 </Collapse>
             </Accordion>
         </form>);
     }
+}
+
+function Input(props) {
+    return (
+        <div className="form-group input-group">
+            <div className="input-group-prepend">
+                <label className="input-group-text" htmlFor={props.id}>{props.label}</label>
+            </div>
+            <input type={props.type} id={props.id} className="form-control" value={props.value} onChange={props.onChange} disabled={props.disabled} />
+        </div>
+    );
 }
 
 function ScoreBox(props) {
@@ -694,6 +685,43 @@ function ScoreBox(props) {
                     <div className="col">{item[0]}</div>
                 </li>))}
         </ul>
+    );
+}
+
+function SkillBox(props) {
+    return (
+        <div>
+            {(props.ranks !== undefined) ?
+            <ul className="container-fluid">
+                {Object.entries(props.ranks).filter((item) => item[1] > 0).map((item) =>
+                    <li className="row border rounded-pill" key={item[0]}>
+                        <div className="col-2">{item[0]}</div>
+                        <div className="col">{ranks[item[1]]}</div>
+                    </li>
+                )}
+            </ul>
+            :""}
+            {(props.attacks !== undefined) ?
+            <ul className="container-fluid">
+                {props.attacks.map((item) =>
+                    <li className="row border rounded-pill" key={item}>
+                        <div className="col-2">{item}</div>
+                        <div className="col">{ranks[2]}</div>
+                    </li>
+                )}
+            </ul>
+            :""}
+            {(props.attacks !== undefined) ?
+            <ul className="container-fluid">
+                {props.defenses.map((item) =>
+                    <li className="row border rounded-pill" key={item}>
+                        <div className="col-2">{item}</div>
+                        <div className="col">{ranks[2]}</div>
+                    </li>
+                )}
+            </ul>
+            :""}
+        </div>
     );
 }
 
